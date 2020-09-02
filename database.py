@@ -25,9 +25,9 @@ class Comment:
     @property
     def relation_s(self):
         return {
-            Relation.bad: "Не доверяю",
-            Relation.neutral: "Нейтрально",
-            Relation.good: "Доверяю"
+            Relation.bad: "не доверяю",
+            Relation.neutral: "нейтрально",
+            Relation.good: "доверяю"
         }[self.relation]
 
 
@@ -43,6 +43,7 @@ class Database:
         if isfile(cls._backup_path):
             with open(cls._backup_path, "rb") as file:
                 return pickle.load(file)
+        return Database()
 
     def save_backup(self):
         with open(self._backup_path, "wb") as file:

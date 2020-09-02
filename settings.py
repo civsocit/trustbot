@@ -11,3 +11,7 @@ class BotSettings:
         if not token:
             raise ValueError("TOKEN variable must be specified")
         return token
+
+    @classmethod
+    def backup_timeout(cls) -> int:
+        return 20

@@ -3,6 +3,8 @@ from aiogram import Bot, Dispatcher, executor, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
 
+from asyncio import sleep
+
 from database import Database, Relation
 from utils import usage, BadCommandFormat
 
@@ -71,12 +73,19 @@ async def info(message: types.Message, state: FSMContext):
         await message.answer("Нет информации по этому пользователю")
         return
 
-    text = "Информация:"
+    text = "Информация:\n"
     for comment in comments:
-        text += f"{comment.relation_s}: {comment.comment}\n"
+        text += f"{comment.user_from} {comment.relation_s}: {comment.comment}\n"
 
     await message.answer(text)
 
 
+async def backup():
+    while True:
+        await sleep(BotSettings.backup_timeout())
+        db.save_backup()
+
+
 if __name__ == '__main__':
+    dp.loop.create_task(backup())
     executor.start_polling(dp, skip_updates=True)
