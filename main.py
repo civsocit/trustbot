@@ -60,20 +60,27 @@ async def info(message: types.Message, state: FSMContext):
     if len(data) < 2:
         raise BadCommandFormat()
 
-    username = data[1]
+    username_to = data[1]
+
+    # Username must be a dog
+    if not username_to.startswith("@"):
+        raise BadCommandFormat()
+
+    username_from = message.from_user.username
 
     if not message.from_user.username:
         await message.answer("У вас должен быть свой username")
         return
 
-    comments = db.get_trusted_comments("@" + message.from_user.username,
-                                       username)
+    username_from = "@" + username_from
+
+    comments = db.get_trusted_comments(username_from, username_to)
 
     if not comments:
         await message.answer("Нет информации по этому пользователю")
         return
 
-    text = "Информация:\n"
+    text = f"Информация по {username_to} для {username_from}:\n"
     for comment in comments:
         text += f"{comment.user_from} {comment.relation_s}: {comment.comment}\n"
 
