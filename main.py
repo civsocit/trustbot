@@ -23,7 +23,7 @@ async def start(message: types.Message, state: FSMContext):
 @dp.message_handler(commands=["inc", "dec"])
 @usage("Формат команды: /inc(/dec) @telegram_login комментарий")
 async def inc_dec(message: types.Message, state: FSMContext):
-    data = message.text.split(" ", maxsplit=3)
+    data = message.text.split(" ", maxsplit=2)
 
     # Command, username must be specified
     if len(data) < 2:
