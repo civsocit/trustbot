@@ -119,6 +119,11 @@ class Database:
 
         first_level, second_level, third_level = self.get_trusted_users(user_from)
 
+        # Another recursion protection
+        first_level -= {user_from}
+        second_level -= {user_from}
+        third_level -= {user_from}
+
         zero_level_comments = self.get_comments({user_from}, user_to)
         first_level_comments = self.get_comments(first_level, user_to)
         second_level_comments = self.get_comments(second_level, user_to)
