@@ -37,6 +37,7 @@ class Database:
 
     def __init__(self):
         self._data: Dict[str, List[Comment]] = dict()
+        self._users: Dict[str, int] = dict()
 
     @classmethod
     def restore_backup(cls) -> "Database":
@@ -48,6 +49,12 @@ class Database:
     def save_backup(self):
         with open(self._backup_path, "wb") as file:
             pickle.dump(self, file)
+
+    def update_user(self, user_name: str, user_id: int):
+        self._users[user_name] = user_id
+
+    def get_user_id(self, user_name: str) -> int:
+        return self._users.get(user_name)
 
     def add_relation(self, user_from: str, user_to: str, relation: Relation, comment_str: Optional[str]):
         comment = Comment(relation=relation, user_from=user_from, user_to=user_to, comment=comment_str)
@@ -146,3 +153,4 @@ if __name__ == '__main__':
 
     for comment in db.get_trusted_comments("A", "C"):
         print(comment)
+

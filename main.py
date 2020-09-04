@@ -2,6 +2,7 @@ from settings import BotSettings
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
+from aiogram.utils.exceptions import TelegramAPIError
 
 from asyncio import sleep
 
@@ -15,9 +16,18 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 db = Database.restore_backup()
 
 
+def update_users_table(func):
+    async def wrapped(message: types.Message, state: FSMContext):
+        if message.from_user.username:
+            db.update_user("@" + message.from_user.username.lower(), message.from_user.id)
+        return await func(message, state)
+    return wrapped
+
+
 @dp.message_handler(commands=["start"])
+@update_users_table
 async def start(message: types.Message, state: FSMContext):
-    await message.answer("Приветик")
+    await message.answer("Приветик. Отправь /help если не знаешь, что делать")
 
 
 @dp.message_handler(regexp=r"^(/inc|/dec|\+|-)\s")
@@ -66,11 +76,23 @@ async def inc_dec(message: types.Message, state: FSMContext):
         "-": Relation.bad
     }[command]
 
+    username_to = username_to.lower()
+    username_from = username_from.lower()
+
     db.add_relation(username_from,
                     username_to,
                     relation,
                     comment)
     await message.answer("Добавлено")
+
+    user_id_to = db.get_user_id(username_to)
+    if user_id_to:
+        text = " ".join([username_from, "не доверяет" if relation is Relation.bad else "доверяет",
+                         "вам:", comment if comment else "(без комментария)"])
+        try:
+            await bot.send_message(user_id_to, text)
+        except TelegramAPIError:
+            pass
 
 
 @dp.message_handler(regexp=r"^(@\S+|/info)")
@@ -94,6 +116,9 @@ async def info(message: types.Message, state: FSMContext):
         return
 
     username_from = "@" + username_from
+
+    username_from = username_from.lower()
+    username_to = username_to.lower()
 
     comments = db.get_trusted_comments(username_from, username_to)
 
