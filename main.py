@@ -66,7 +66,7 @@ async def inc_dec(message: types.Message, state: FSMContext):
         "-": Relation.bad
     }[command]
 
-    db.add_relation("@" + username_from,
+    db.add_relation(username_from,
                     username_to,
                     relation,
                     comment)
